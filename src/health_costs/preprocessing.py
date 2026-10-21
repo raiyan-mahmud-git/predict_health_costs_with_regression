@@ -1,4 +1,4 @@
-"""Leakage-safe feature engineering and preprocessing."""
+"""Leakage-safe feature."""
 
 from __future__ import annotations
 

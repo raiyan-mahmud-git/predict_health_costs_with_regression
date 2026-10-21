@@ -12,11 +12,7 @@ from .config import DATA_URL, DEFAULT_CACHE_DIR, REQUIRED_COLUMNS, TARGET
 
 
 def validate_dataset(frame: pd.DataFrame) -> pd.DataFrame:
-    """Validate the source schema and return a cleanly typed copy.
-
-    Exact duplicate rows are retained for challenge compatibility; evaluation
-    groups identical rows so copies cannot straddle CV folds.
-    """
+   
     missing = sorted(set(REQUIRED_COLUMNS) - set(frame.columns))
     if missing:
         raise ValueError(f"Dataset is missing required columns: {', '.join(missing)}")

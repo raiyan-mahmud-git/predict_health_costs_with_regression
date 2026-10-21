@@ -1,4 +1,4 @@
-"""Keras model construction, persistence, and safe inference."""
+"""Keras model construction"""
 
 from __future__ import annotations
 
