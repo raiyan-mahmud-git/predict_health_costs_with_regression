@@ -77,10 +77,6 @@ def _classical_candidates():
 
 def evaluate_classical_cv(development_data: pd.DataFrame, *, n_splits: int = 5) -> pd.DataFrame:
     """Compare mean/linear/boosted references with grouped CV.
-
-    Exact duplicates remain in the data, but share a group and therefore cannot
-    appear on opposite sides of any fold. The final test set is excluded by the
-    caller before this function runs.
     """
     raw_features = development_data.drop(columns=TARGET)
     labels = development_data[TARGET].to_numpy(dtype=float)
@@ -208,7 +204,7 @@ def train_project(
     development = data.iloc[development_idx].reset_index(drop=True)
     test = data.iloc[test_idx].reset_index(drop=True)
 
-    # Reference-model CV uses development rows only, never the final test rows.
+    # Reference-model CV uses development rows only.
     if run_cv:
         cv_results = pd.concat(
             [
@@ -240,8 +236,7 @@ def train_project(
     validation_dataset = preprocessor.transform(validation_features).astype(np.float32)
     test_dataset = preprocessor.transform(test_features).astype(np.float32)
 
-    # Import TensorFlow only for the Keras training step so CV utilities and
-    # preprocessing can be used independently.
+    # Import TensorFlow only for the Keras training step.
     from tensorflow import keras
 
     from .model import build_keras_model, early_stopping, save_artifacts
