@@ -40,9 +40,7 @@ def _train(args) -> int:
                 },
             )
         )
-    # Keras 3.4/TensorFlow 2.16 can lose target rank in evaluate() on Windows
-    # after fit(). Predict once and compute the reported holdout metrics with
-    # sklearn. The compiled model still keeps the grader-required MAE/MSE order.
+    
     test_dataset = np.asarray(run.test_dataset, dtype=np.float32)
     truth = np.asarray(run.test_labels, dtype=np.float32).reshape(-1)
     predictions = run.model.predict(test_dataset, verbose=0).reshape(-1)
