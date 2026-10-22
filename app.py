@@ -1,5 +1,4 @@
 """Local Streamlit interface for the MEPS annual expenditure model."""
-"""runs on the browser"""
 
 from __future__ import annotations
 
