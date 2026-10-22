@@ -54,13 +54,7 @@ st.markdown(
 )
 
 st.markdown(
-    """
-    <section class="hero">
-      <div class="eyebrow">A data science demo · U.S. 2024 survey data</div>
-      <h1>Understand a year of health-care spending.</h1>
-      <p>Explore an educational estimate based on age, BMI, self-rated health, smoking frequency, sex, and Census region.</p>
-    </section>
-    """,
+    
     unsafe_allow_html=True,
 )
 
