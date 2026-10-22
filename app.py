@@ -12,7 +12,6 @@ from health_costs.meps_model import (
     MEPS_MODEL_DIR,
     load_meps_artifacts,
     predict_meps_expenditure,
-    train_meps_project,
 )
 
 st.set_page_config(
@@ -75,29 +74,10 @@ model_file = model_path / "annual_expenditure.joblib"
 metadata_file = model_path / "metadata.json"
 
 if not (model_file.exists() and metadata_file.exists()):
-    st.info("The MEPS 2024 model has not been trained in this project folder yet.")
-    st.markdown(
-        """
-        <div class="panel">
-          <strong>One-time setup</strong><br>
-          Train locally from AHRQ’s public-use file. The download is cached on this computer; no data is sent to a hosting service.
-          The first run needs internet access and may take a few minutes.
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
-    if st.button("Download MEPS data and train model", type="primary"):
-        try:
-            with st.spinner("Preparing survey records, evaluating grouped folds, and fitting the model…"):
-                outcome = train_meps_project()
-            _load_model.clear()
-            st.success(
-                f"Done. Trained on {outcome['metadata']['valid_rows']:,} eligible adults. "
-                f"Weighted holdout MAE: ${outcome['metadata']['holdout_weighted_metrics']['mae']:,.0f}."
-            )
-            st.rerun()
-        except Exception as exc:
-            st.error(str(exc))
+    st.error("The pre-trained MEPS model bundle is missing.")
+    st.write("For local development, train it from the project environment with:")
+    st.code("health-costs meps-train", language="powershell")
+    st.caption("For a hosted app, include both model files under models/meps_2024/ in the deployed repository.")
     st.stop()
 
 try:
@@ -109,10 +89,17 @@ except Exception as exc:
 estimate_tab, methodology_tab = st.tabs(["Estimate", "How it works"])
 
 with estimate_tab:
+    holdout = metadata["holdout_weighted_metrics"]
+    st.warning(
+        f"Validation is weak: on held-out households, weighted MAE was ${holdout['mae']:,.0f} and "
+        f"weighted R² was {holdout['r2']:.3f}. The negative R² means this model performed slightly "
+        "worse than predicting the weighted average on that test set. Individual estimates may be far off."
+    )
     left, right = st.columns([1.08, .92], gap="large")
     with left:
         st.markdown("### Person details")
-        st.caption("All five inputs are required. MEPS features are adult survey fields.")
+        st.caption("All six inputs are required. MEPS features are adult survey fields.")
+        st.caption("Inputs are processed by the server hosting this app to generate an estimate. Do not enter identifying information.")
         with st.form("estimate_form"):
             age = st.slider("Age", min_value=18, max_value=85, value=35, help="The source survey top-codes age at 85.")
             bmi = st.number_input("Body mass index (BMI)", min_value=10.0, max_value=50.0, value=27.5, step=0.1)

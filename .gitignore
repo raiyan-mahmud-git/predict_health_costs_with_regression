@@ -16,3 +16,6 @@ reports/*
 *.keras
 *.joblib
 .ipynb_checkpoints/
+!models/meps_2024/
+!models/meps_2024/annual_expenditure.joblib
+!models/meps_2024/metadata.json

@@ -1,0 +1,35 @@
+{
+  "dataset": "AHRQ MEPS HC-256, 2024 Full Year Consolidated Public Use File",
+  "target": "annual_healthcare_expenditure",
+  "target_description": "Annual total health-care expenditure in 2024 dollars; not an insurance premium or quote.",
+  "features": [
+    "age",
+    "bmi",
+    "sex",
+    "region",
+    "smoking_frequency",
+    "self_rated_health"
+  ],
+  "feature_ranges": {
+    "age": [
+      18.0,
+      85.0
+    ],
+    "bmi": [
+      10.93,
+      50.0
+    ]
+  },
+  "valid_rows": 10077,
+  "development_rows": 8058,
+  "holdout_rows": 2019,
+  "weight": "PESAQWT24F survey weight",
+  "split": "GroupShuffleSplit by household; 20% holdout",
+  "cv": "5-fold GroupKFold by household on development rows only",
+  "holdout_weighted_metrics": {
+    "mae": 9593.15617235749,
+    "rmse": 29789.454371103897,
+    "r2": -0.009638397788739317
+  },
+  "warning": "Educational estimate from survey expenditures; not a clinical or insurance-pricing decision."
+}

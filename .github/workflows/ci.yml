@@ -15,7 +15,7 @@ jobs:
           python-version: "3.12"
           cache: pip
           cache-dependency-path: |
-            requirements.txt
+            requirements-fcc.txt
             requirements-dev.txt
       - name: Install pinned dependencies
         run: |
