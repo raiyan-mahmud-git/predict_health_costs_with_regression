@@ -5,6 +5,7 @@ __pycache__/
 .coverage
 htmlcov/
 .venv/
+.ui-venv/
 venv/
 .cache/
 data/insurance.csv

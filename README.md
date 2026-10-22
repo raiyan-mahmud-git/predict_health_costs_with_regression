@@ -1,6 +1,11 @@
 # Health Costs Regression
 
-A reproducible, educational upgrade of the FreeCodeCamp health-costs regression challenge. It predicts the `expenses` column from age, BMI, children, sex, smoking status, and region. This small public teaching dataset is not suitable for real insurance pricing or underwriting.
+An educational project with two separate health-cost estimation tracks:
+
+1. The original FreeCodeCamp challenge model predicts its `expenses` field and keeps the grader-compatible Keras model.
+2. A separate AHRQ MEPS 2024 model estimates annual total health-care expenditures for adults, with a local Streamlit interface.
+
+The targets describe different things and are trained separately. Neither model is suitable for real insurance pricing or underwriting.
 
 ## Project layout
 
@@ -8,11 +13,12 @@ A reproducible, educational upgrade of the FreeCodeCamp health-costs regression 
 .
 ├── DATASET_ATTRIBUTION.md
 ├── LICENSE
+├── app.py                   # local Streamlit MEPS estimator
 ├── notebooks/Copy_of_fcc_predict_health_costs_with_regression.ipynb
-├── src/health_costs/       # data, preprocessing, training, inference, CLI
+├── src/health_costs/        # separate FCC and MEPS data/model pipelines + CLI
 ├── tests/
-├── models/                 # generated .keras model + joblib preprocessor (ignored)
-└── reports/                # generated CV results (ignored)
+├── models/                  # generated model bundles (ignored)
+└── reports/                 # generated CV results (ignored)
 ```
 
 ## Runtime versions
@@ -78,13 +84,43 @@ health-costs predict --input examples/prediction_input.csv --output predictions.
 
 The input features remain in their original units and categories. Missing or invalid categories are rejected; a valid category absent from a particular training fold is handled by the encoder's unknown-category rule. Values outside the observed age, BMI, or children ranges generate warnings because extrapolation has not been validated.
 
+## MEPS annual expenditure model and local UI
+
+The separate MEPS model uses the AHRQ 2024 Full Year Consolidated Public Use File. It predicts `TOTEXP24`, total reported health-care expenditure for the year, from adult age, BMI, self-rated health, sex, Census region, and cigarette-smoking frequency. This is an expenditure estimate—not an insurance premium. BMI and smoking responses are not available for everyone, so the training pipeline uses the 10,079 eligible adult records in the 2024 file with valid inputs, target, and PSAQ/ESAQ expenditure weights. Survey weights are used during model fitting and scoring; split and cross-validation folds keep households together.
+
+Use a separate lightweight environment for the UI. TensorFlow 2.16 (used by the FCC grader model) requires protobuf below 5, while current Streamlit requires protobuf 5 or newer; keeping the UI separate avoids that dependency conflict. In Windows PowerShell:
+
+```powershell
+py -3.12 -m venv .ui-venv
+.\.ui-venv\Scripts\Activate.ps1
+python -m pip install --upgrade pip
+pip install -r requirements-ui.txt
+pip install -e . --no-deps
+```
+
+Start the app locally:
+
+```powershell
+streamlit run app.py
+```
+
+If the MEPS model has not been trained yet, use **Download MEPS data and train model** in the app. Or, using the existing full project `.venv`, train it from the command line:
+
+```powershell
+health-costs meps-train
+```
+
+The official AHRQ Stata ZIP is cached under `.cache/meps/`; model files and evaluation reports are written to `models/meps_2024/` and `reports/meps_2024/`. These local files are ignored by Git. The download has a 45-second timeout and reports an actionable error when the source is unavailable; a local AHRQ ZIP can be supplied with `health-costs meps-train --data path/to/h256dta.zip`. The Streamlit app runs on your computer and does not require paid hosting.
+
+This MEPS prediction describes total annual expenditure in 2024 U.S. dollars for an adult with the entered characteristics. The model omits diagnoses, utilization, and many other factors that drive an individual's spending. It is a teaching demonstration, not a clinical, insurance, or financial recommendation. See [DATASET_ATTRIBUTION.md](DATASET_ATTRIBUTION.md) for the AHRQ data-use terms and source details.
+
 ## Checks
 
 ```bash
 pytest
 ```
 
-Tests cover schema/data loading, caching and offline errors, interaction encoding, duplicate grouping, grader metric ordering, out-of-range warnings, and model/preprocessor save-and-reload prediction parity.
+Tests cover schema/data loading, caching and offline errors, interaction encoding, duplicate grouping, grader metric ordering, out-of-range warnings, MEPS sentinel decoding and feature mapping, and model/preprocessor save-and-reload prediction parity.
 
 ## Interpretation and limitations
 

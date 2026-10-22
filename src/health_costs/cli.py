@@ -11,6 +11,8 @@ from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 
 from .config import DEFAULT_MODEL_DIR, DEFAULT_REPORT_DIR
 from .data import load_dataset
+from .meps_data import load_meps_dataset
+from .meps_model import MEPS_MODEL_DIR, MEPS_REPORT_DIR, train_meps_project
 from .model import load_artifacts, predict_expenses
 from .training import train_project
 
@@ -66,6 +68,30 @@ def _predict(args) -> int:
     return 0
 
 
+def _meps_train(args) -> int:
+    data = load_meps_dataset(args.data, timeout_seconds=args.timeout)
+    print(
+        f"Loaded {len(data):,} valid adult MEPS records from 2024 "
+        f"across {data['household_group'].nunique():,} households."
+    )
+    result = train_meps_project(
+        data,
+        model_dir=args.model_dir,
+        report_dir=args.report_dir,
+    )
+    print("\nGrouped, survey-weighted 5-fold CV:")
+    print(result["cv_results"].to_string(index=False, formatters={"mae_mean": "${:,.2f}".format}))
+    metrics = result["metadata"]["holdout_weighted_metrics"]
+    print("\nUntouched, household-grouped 20% holdout (survey-weighted):")
+    print(
+        f"MAE: ${metrics['mae']:,.2f} | RMSE: ${metrics['rmse']:,.2f} | "
+        f"R²: {metrics['r2']:.3f}"
+    )
+    print(f"MEPS model and metadata saved to {Path(args.model_dir).resolve()}")
+    print(f"CV results saved to {Path(args.report_dir).resolve()}")
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="health-costs")
     commands = parser.add_subparsers(dest="command", required=True)
@@ -84,6 +110,15 @@ def main(argv: list[str] | None = None) -> int:
     predict.add_argument("--output", help="optional output CSV path")
     predict.add_argument("--model-dir", default=str(DEFAULT_MODEL_DIR))
     predict.set_defaults(handler=_predict)
+
+    meps_train = commands.add_parser(
+        "meps-train", help="download/load MEPS 2024, run grouped CV, and train the expenditure model"
+    )
+    meps_train.add_argument("--data", help="local AHRQ MEPS Stata ZIP; otherwise use cache or download")
+    meps_train.add_argument("--timeout", type=float, default=45.0, help="MEPS download timeout in seconds")
+    meps_train.add_argument("--model-dir", default=str(MEPS_MODEL_DIR))
+    meps_train.add_argument("--report-dir", default=str(MEPS_REPORT_DIR))
+    meps_train.set_defaults(handler=_meps_train)
 
     args = parser.parse_args(argv)
     return args.handler(args)
