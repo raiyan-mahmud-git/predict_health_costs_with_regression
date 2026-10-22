@@ -25,19 +25,29 @@ st.set_page_config(
 st.markdown(
     """
     <style>
-    .stApp { background: radial-gradient(ellipse at 15% 0%, #edf7f5 0, #f6f8fb 42%, #f6f8fb 100%); }
+    /* Keep the app palette tied to Streamlit's selected theme. Hard-coded
+       light surfaces made headings, tabs, and captions disappear in dark mode. */
+    .stApp { background: var(--background-color); color: var(--text-color); }
     html, body, [class*="css"] { font-family: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif; }
-    h1, h2, h3 { font-family: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif; letter-spacing: -0.035em; color: #122a35; }
+    h1, h2, h3 { font-family: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif; letter-spacing: -0.035em; color: var(--text-color); }
     .block-container { max-width: 1080px; padding-top: 2.3rem; padding-bottom: 4rem; }
     .hero { background: linear-gradient(120deg, #102f3a 0%, #155b59 100%); color: white; padding: 2.2rem 2.5rem; border-radius: 24px; margin-bottom: 1.4rem; box-shadow: 0 18px 45px rgba(21, 66, 72, .16); }
     .hero h1 { color: white; font-size: 2.65rem; margin: .3rem 0 .55rem; }
     .hero p { color: #d4e8e4; max-width: 670px; margin: 0; font-size: 1.06rem; }
     .eyebrow { text-transform: uppercase; letter-spacing: .16em; font-size: .74rem; font-weight: 700; color: #8ee0c9; }
-    .panel { background: rgba(255,255,255,.88); border: 1px solid #e3ebee; padding: 1.35rem 1.5rem; border-radius: 18px; box-shadow: 0 8px 28px rgba(16,47,58,.045); }
-    .result { background: linear-gradient(130deg, #e3f5ee, #f4fbf7); border: 1px solid #cfe9dd; padding: 1.35rem 1.6rem; border-radius: 18px; }
-    .fineprint { color: #587078; font-size: .88rem; line-height: 1.55; }
+    .panel { background: var(--secondary-background-color); color: var(--text-color); border: 1px solid color-mix(in srgb, var(--text-color) 14%, transparent); padding: 1.35rem 1.5rem; border-radius: 18px; box-shadow: 0 8px 28px rgba(16,47,58,.045); }
+    .result { background: color-mix(in srgb, #147d6e 13%, var(--secondary-background-color)); color: var(--text-color); border: 1px solid color-mix(in srgb, #147d6e 30%, transparent); padding: 1.35rem 1.6rem; border-radius: 18px; }
+    .fineprint { color: var(--text-color); opacity: .72; font-size: .88rem; line-height: 1.55; }
     div.stButton > button[kind="primary"], div.stFormSubmitButton > button[kind="primary"] { background: #147d6e; border: 0; border-radius: 11px; font-weight: 700; padding: .68rem 1.15rem; }
-    div[data-testid="stMetric"] { background: white; padding: 1rem 1.2rem; border-radius: 15px; border: 1px solid #dcebe5; }
+    div[data-testid="stMetric"] { background: var(--secondary-background-color); color: var(--text-color); padding: 1rem 1.2rem; border-radius: 15px; border: 1px solid color-mix(in srgb, var(--text-color) 14%, transparent); }
+    /* Streamlit's tabs inherit low-contrast defaults in custom themed apps. */
+    button[data-baseweb="tab"] { color: var(--text-color); }
+    @media (prefers-reduced-motion: no-preference) {
+      .hero, .panel, .result { transition: background-color .2s ease, color .2s ease, border-color .2s ease; }
+    }
+    html[data-theme="dark"] .stApp { background: radial-gradient(ellipse at 15% 0%, #172c31 0, var(--background-color) 48%); }
+    html[data-theme="dark"] .panel,
+    html[data-theme="dark"] div[data-testid="stMetric"] { box-shadow: 0 8px 28px rgba(0,0,0,.18); }
     </style>
     """,
     unsafe_allow_html=True,
