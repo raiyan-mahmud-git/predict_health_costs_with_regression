@@ -57,7 +57,6 @@ The loader validates required columns and values, reports duplicate rows, and re
 
 ```bash
 health-costs train
-# or use an existing CSV without downloading:
 health-costs train --data path/to/insurance.csv
 ```
 
@@ -88,6 +87,8 @@ The input features remain in their original units and categories. Missing or inv
 
 The separate MEPS model uses the AHRQ 2024 Full Year Consolidated Public Use File. It predicts `TOTEXP24`, total reported health-care expenditure for the year, from adult age, BMI, self-rated health, sex, Census region, and cigarette-smoking frequency. This is an expenditure estimate—not an insurance premium. BMI and smoking responses are not available for everyone, so the training pipeline uses the 10,079 eligible adult records in the 2024 file with valid inputs, target, and PSAQ/ESAQ expenditure weights. Survey weights are used during model fitting and scoring; split and cross-validation folds keep households together.
 
+**Geographic scope:** MEPS represents the U.S. civilian, noninstitutionalized population. The estimator is intended only as a U.S.-context teaching example, with spending expressed in 2024 U.S. dollars. Estimates for people living in other countries are not validated or calibrated to their health systems, prices, or currencies and should not be interpreted as plausible local costs.
+
 Use a separate lightweight environment for the UI. TensorFlow 2.16 (used by the FCC grader model) requires protobuf below 5, while current Streamlit requires protobuf 5 or newer; keeping the UI separate avoids that dependency conflict. In Windows PowerShell:
 
 ```powershell
@@ -112,7 +113,7 @@ health-costs meps-train
 
 The official AHRQ Stata ZIP is cached under `.cache/meps/`; model files and evaluation reports are written to `models/meps_2024/` and `reports/meps_2024/`. These local files are ignored by Git. The download has a 45-second timeout and reports an actionable error when the source is unavailable; a local AHRQ ZIP can be supplied with `health-costs meps-train --data path/to/h256dta.zip`. The Streamlit app runs on your computer and does not require paid hosting.
 
-This MEPS prediction describes total annual expenditure in 2024 U.S. dollars for an adult with the entered characteristics. The model omits diagnoses, utilization, and many other factors that drive an individual's spending. It is a teaching demonstration, not a clinical, insurance, or financial recommendation. See [DATASET_ATTRIBUTION.md](DATASET_ATTRIBUTION.md) for the AHRQ data-use terms and source details.
+This MEPS prediction describes total annual expenditure in 2024 U.S. dollars for an adult with the entered characteristics. Its U.S. survey training data does not support estimates for other countries. The model omits diagnoses, utilization, and many other factors that drive an individual's spending. It is a teaching demonstration, not a clinical, insurance, or financial recommendation. See [DATASET_ATTRIBUTION.md](DATASET_ATTRIBUTION.md) for the AHRQ data-use terms and source details.
 
 ## Checks
 

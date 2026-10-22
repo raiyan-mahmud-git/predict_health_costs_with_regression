@@ -96,7 +96,7 @@ if not (model_file.exists() and metadata_file.exists()):
                 f"Weighted holdout MAE: ${outcome['metadata']['holdout_weighted_metrics']['mae']:,.0f}."
             )
             st.rerun()
-        except Exception as exc:  # show actionable data/download errors in the UI
+        except Exception as exc:
             st.error(str(exc))
     st.stop()
 

@@ -236,7 +236,6 @@ def train_project(
     validation_dataset = preprocessor.transform(validation_features).astype(np.float32)
     test_dataset = preprocessor.transform(test_features).astype(np.float32)
 
-    # Import TensorFlow only for the Keras training step.
     from tensorflow import keras
 
     from .model import build_keras_model, early_stopping, save_artifacts
